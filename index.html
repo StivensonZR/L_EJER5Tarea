@@ -1,98 +1,219 @@
 <!DOCTYPE html>
-<html>
-<meta charset="utf-8" />
+<html lang="en">
 
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src=" https://unpkg.com/leaflet@1.6.0/dist/leaflet.js "></script>
+    <link rel="stylesheet" href=" https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+    <!---GeoJson-->
+    <script type="text/javascript" src="departamentos.js"></script>
+    <script type="text/javascript" src="ciudades.js"></script>
+    <script type="text/javascript" src="paises.js"></script>
+
+    <title>Ejercicio5</title>
     <style>
         #map {
             width: 100%;
             height: 600px;
             box-shadow: 5px 5px 5px #888;
         }
+
+        .info {
+            padding: 20px 20px;
+            font: 16px/18px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgb(255, 0, 0);
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .info h2 {
+            margin: 0 0 5px;
+            color: rgb(255, 0, 0);
+        }
+
+        .legend {
+            opacity: 0.7;
+        }
     </style>
+
+    <script>
+        var countryStyle = {
+            'color': "#e12a2a",
+            'weight': 2,
+            'opacity': 0.6
+        };
+        //funcion asignadora de los colores segun el atributo d
+
+
+        function getColor(d) {
+            return d > 100000000 ? '#800026' :
+                d > 50000000 ? '#BD0026' :
+                    d > 20000000 ? '#E31A1C' :
+                        d > 10000000 ? '#FC4E2A' :
+                            d > 5000000 ? '#FD8D3C' :
+                                d > 2000000 ? '#FEB24C' :
+                                    d > 1000000 ? '#FED976' :
+                                        '#FFEDA0';
+        };
+
+
+        //funcion para asignar los colores, importar abajo
+        function style(feature) {
+            return {
+                fillColor: getColor(feature.properties.pop_est),
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                dashArray: '3',
+                fillOpacity: 0.7
+            };
+        }
+
+        // DEPARTAMENTOS
+        function getColorDep(d) {
+            return d > 1000000000000 ? '#800026' :
+                d > 500000000000 ? '#BD0026' :
+                    d > 200000000000 ? '#E31A1C' :
+                        d > 100000000000 ? '#FC4E2A' :
+                            d > 50000000000 ? '#FD8D3C' :
+                                d > 20000000000 ? '#FEB24C' :
+                                    d > 10000000000 ? '#FED976' :
+                                        '#b28fbb';
+        };
+
+
+        //funcion para asignar los colores, importar abajo
+        function styleDep(feature) {
+            return {
+                fillColor: getColorDep(feature.properties.SHAPE_AREA),
+                weight: 2,
+                opacity: 1,
+                color: 'white',
+                dashArray: '3',
+                fillOpacity: 0.7
+            };
+        }
+
+
+        // PARA LAS ciudades
+
+
+        function getColorCity(d) {
+            if (d == "S") {
+                d = "YELLOW";
+            } else if (d == "N") {
+                d = "GREEN";
+            } else {
+                d = "WHITE";
+            }
+            return d;
+        };
+
+
+        function pointToLayer(feature, latlng) {
+            return L.circleMarker(latlng, {
+                // Stroke properties
+                color: 'BLACK',
+                opacity: 0.75,
+                weight: 1,
+
+                // Fill properties
+                fillColor: getColorCity(feature.properties.CAPITAL),
+                fillOpacity: 0.6,
+
+                radius: 3.2
+            });
+        }
+
+        function popupCity(feature, layer) {
+            if (feature.properties && feature.properties.CIUDAD) {
+                layer.bindPopup(feature.properties.CIUDAD);
+            }
+        }
+
+        //Para poner el popup a cada pais,importar abajo
+        function popup(feature, layer) {
+            if (feature.properties && feature.properties.name) {
+                //atributo a mostrar en el popup
+                layer.bindPopup(feature.properties.name);
+            }
+        }
+
+        function popupDep(feature, layer) {
+            if (feature.properties && feature.properties.COD_DANE) {
+                layer.bindPopup(feature.properties.COD_DANE);
+            }
+        }
+
+    </script>
 </head>
 
 <body>
-    <div id="map"></div>
+
+
+    <div id='map'>
+
+    </div>
+
     <script>
-        var OMS = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        //L.tilelayer sirve para llamar capas de otro servidor
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
                 + 'contributors',
             maxZoom: 18
         });
 
+
+
+        //el 'map' es el id del div donde se mostrara el mapa
         var map = L.map('map', {
-            center: [1.62057222283137, -75.60428021611501],
-            zoom: 15,
-            layers: [OMS],
-            //scrollWheelZoom: false,
+            //coordenadas decimanles donde se abrira el mapa
+            center: [41.66, -4.72],
+            //zona bastante grande
+            zoom: 3,
+            //llamo la capa base 
+            layers: osm,
+            //para con la ruedita del maouse acercarse o alejarse
+            scrollWheelZoom: true,
         });
+        //-----GeoJson
+
+
+        L.geoJson(paises, {
+            //funcion de colores
+            style: style
+        }).addTo(map);
+   
+        //para agregar la funcion del popup al mapa
+        geojson = L.geoJson(paises, {
+            style: style,
+            onEachFeature: popup
+        }).addTo(map);
+
+        L.geojson = L.geoJson(departamentos, {
+            style: styleDep,
+            onEachFeature: popupDep
+        }).addTo(map);
 
         L.control.scale().addTo(map);
 
+        L.geoJson(ciudades,{
+            pointToLayer: pointToLayer,
+            onEachFeature: popupCity
+        }).addTo(map)
 
-        var myIcon = L.icon({
-            iconUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.uniamazonia.edu.co%2F&psig=AOvVaw16VpeiMzPGsp3G3aNjTZ6H&ust=1654265728227000&source=images&cd=vfe&ved=0CAwQjRxqFwoTCKjCnpv6jvgCFQAAAAAdAAAAABAR',
-            iconSize: [50, 50],
-            popupAnchor: [-1, -10]
-        });
-
-
-        var house = L.marker([1.6232087259731338, -75.61324476384117], {
-            draggable: false,
-            tittle: 'Clic para el detalle'
-        }).addTo(map).bindPopup('My house').openPopup();
-
-        var plaza = L.marker([1.614945, -75.613268], {
-            draggable: false,
-            tittle: 'Clic para el detalle'
-        }).addTo(map).bindPopup('parque Santander').openPopup();
-
-        var marker = L.marker([1.62057222283137, -75.60428021611501], {
-            draggable: false,
-            tittle: 'Clic para el detalle'
-        }).addTo(map).bindPopup('Universidad de la Amazonia').openPopup();
-
-
-        var circle = L.circle([1.62057222283137, -75.60428021611501], 500, {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.3
-        }).addTo(map).bindPopup("Explosión");
-
-
-        var polygon = L.polygon([
-            [1.614500, -75.613508],
-            [1.614694, -75.612810],
-            [1.615410, -75.613026],
-            [1.615181, -75.613716]
-        ]).addTo(map).bindPopup('Poligono parque Santander');
-
-
-        var pointA = new L.LatLng(1.6232087259731338, -75.61324476384117);
-        var pointB = new L.LatLng(1.622416, -75.613101);
-        var pointC = new L.LatLng(1.622802, -75.610454);
-        var pointD = new L.LatLng(1.620818, -75.610024);
-        var pointE = new L.LatLng(1.620513, -75.610137);
-        var pointF = new L.LatLng(1.620413, -75.609772);
-        var pointG = new L.LatLng(1.619352, -75.606904);
-        var pointH = new L.LatLng(1.617521, -75.605662);
-        var pointI = new L.LatLng(1.617582, -75.605564);
-        var pointJ = new L.LatLng(1.618854, -75.606425);
-        var pointK = new L.LatLng(1.620120, -75.605183);
-        var pointL = new L.LatLng(1.620045, -75.604247);
-
-        var latlngs = [pointA, pointB,pointC, pointD, pointE, pointF, pointG, pointH, pointI, pointJ, pointK, pointL];
-
-        var polyline = L.polyline(
-            latlngs, {color: 'red'}
-        )
-        .addTo(map)
-        .bindPopup ('Ruta casa - universidad');
-
-
+        /* var title = L.control();
+        title.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info');
+            div.innerHTML +=
+                '<h2>Paises</h2>'; return div;
+        };
+        title.addTo(map); */
     </script>
 </body>
 
