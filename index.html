@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <style>
+        #map {
+            width: 100%;
+            height: 600px;
+            box-shadow: 5px 5px 5px #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var OMS = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
+                + 'contributors',
+            maxZoom: 18
+        });
+
+        var map = L.map('map', {
+            center: [1.62057222283137, -75.60428021611501],
+            zoom: 15,
+            layers: [OMS],
+            //scrollWheelZoom: false,
+        });
+
+        L.control.scale().addTo(map);
+
+
+        var myIcon = L.icon({
+            iconUrl: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.uniamazonia.edu.co%2F&psig=AOvVaw16VpeiMzPGsp3G3aNjTZ6H&ust=1654265728227000&source=images&cd=vfe&ved=0CAwQjRxqFwoTCKjCnpv6jvgCFQAAAAAdAAAAABAR',
+            iconSize: [50, 50],
+            popupAnchor: [-1, -10]
+        });
+
+
+        var house = L.marker([1.6232087259731338, -75.61324476384117], {
+            draggable: false,
+            tittle: 'Clic para el detalle'
+        }).addTo(map).bindPopup('My house').openPopup();
+
+        var plaza = L.marker([1.614945, -75.613268], {
+            draggable: false,
+            tittle: 'Clic para el detalle'
+        }).addTo(map).bindPopup('parque Santander').openPopup();
+
+        var marker = L.marker([1.62057222283137, -75.60428021611501], {
+            draggable: false,
+            tittle: 'Clic para el detalle'
+        }).addTo(map).bindPopup('Universidad de la Amazonia').openPopup();
+
+
+        var circle = L.circle([1.62057222283137, -75.60428021611501], 500, {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.3
+        }).addTo(map).bindPopup("Explosión");
+
+
+        var polygon = L.polygon([
+            [1.614500, -75.613508],
+            [1.614694, -75.612810],
+            [1.615410, -75.613026],
+            [1.615181, -75.613716]
+        ]).addTo(map).bindPopup('Poligono parque Santander');
+
+
+        var pointA = new L.LatLng(1.6232087259731338, -75.61324476384117);
+        var pointB = new L.LatLng(1.622416, -75.613101);
+        var pointC = new L.LatLng(1.622802, -75.610454);
+        var pointD = new L.LatLng(1.620818, -75.610024);
+        var pointE = new L.LatLng(1.620513, -75.610137);
+        var pointF = new L.LatLng(1.620413, -75.609772);
+        var pointG = new L.LatLng(1.619352, -75.606904);
+        var pointH = new L.LatLng(1.617521, -75.605662);
+        var pointI = new L.LatLng(1.617582, -75.605564);
+        var pointJ = new L.LatLng(1.618854, -75.606425);
+        var pointK = new L.LatLng(1.620120, -75.605183);
+        var pointL = new L.LatLng(1.620045, -75.604247);
+
+        var latlngs = [pointA, pointB,pointC, pointD, pointE, pointF, pointG, pointH, pointI, pointJ, pointK, pointL];
+
+        var polyline = L.polyline(
+            latlngs, {color: 'red'}
+        )
+        .addTo(map)
+        .bindPopup ('Ruta casa - universidad');
+
+
+    </script>
+</body>
+
+</html>
