@@ -13,7 +13,17 @@
     <script type="text/javascript" src="ciudades.js"></script>
     <script type="text/javascript" src="paises.js"></script>
 
+    <link rel="stylesheet" href="dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="dist/MarkerCluster.Default.css" />
+    <script src="dist/leaflet.markercluster-src.js"></script>
+    <script src="dist/leaflet.markercluster.js"></script>
+
+    <!---Minimap-->
+    <link rel="stylesheet" type="text/css" href="dist/Control.MiniMap.min.css" />
+    <script src="dist/Control.MiniMap.min.js"></script>
+
     <title>Ejercicio5</title>
+
     <style>
         #map {
             width: 100%;
@@ -116,18 +126,16 @@
 
 
         function pointToLayer(feature, latlng) {
-            return L.circleMarker(latlng, {
+            return markers.addLayer(L.circleMarker(latlng, {
                 // Stroke properties
                 color: 'BLACK',
                 opacity: 0.75,
                 weight: 1,
-
                 // Fill properties
                 fillColor: getColorCity(feature.properties.CAPITAL),
                 fillOpacity: 0.6,
-
-                radius: 3.2
-            });
+                radius: 8
+            }));
         }
 
         function popupCity(feature, layer) {
@@ -168,8 +176,6 @@
             maxZoom: 18
         });
 
-
-
         //el 'map' es el id del div donde se mostrara el mapa
         var map = L.map('map', {
             //coordenadas decimanles donde se abrira el mapa
@@ -183,37 +189,65 @@
         });
         //-----GeoJson
 
-
+        const markers = L.markerClusterGroup();
+/* 
         L.geoJson(paises, {
             //funcion de colores
             style: style
-        }).addTo(map);
-   
+        }).addTo(map); */
+
+        var baseMaps = {
+            "OpenStreetMap": osm,
+           
+        };
+
         //para agregar la funcion del popup al mapa
-        geojson = L.geoJson(paises, {
+        var paises = L.geoJson(paises, {
             style: style,
             onEachFeature: popup
         }).addTo(map);
 
-        L.geojson = L.geoJson(departamentos, {
+        var departamentos= L.geoJson(departamentos, {
             style: styleDep,
             onEachFeature: popupDep
         }).addTo(map);
 
         L.control.scale().addTo(map);
 
-        L.geoJson(ciudades,{
+        var ciudades = L.geoJson(ciudades, {
             pointToLayer: pointToLayer,
             onEachFeature: popupCity
         }).addTo(map)
 
-        /* var title = L.control();
+        
+        var overlayMaps = {
+            "Paises": paises,
+            "Departamentos": departamentos,
+            "Ciudades": ciudades
+        };
+
+        //minimapa
+        var carto_light = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '©OpenStreetMap, ©CartoDB', subdomains: 'abcd', maxZoom: 24 });
+
+        // Agregar plugin MiniMap
+        var minimap = new L.Control.MiniMap(carto_light,
+            {
+                toggleDisplay: true,
+                minimized: false,
+                position: "bottomleft"
+            }).addTo(map);
+
+
+        var title = L.control();
         title.onAdd = function (map) {
             var div = L.DomUtil.create('div', 'info');
             div.innerHTML +=
                 '<h2>Paises</h2>'; return div;
         };
-        title.addTo(map); */
+        title.addTo(map); 
+
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+
     </script>
 </body>
 
